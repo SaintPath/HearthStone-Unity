@@ -8,13 +8,12 @@ using UnityEngine.UI;
 
 public class SC_Hero : MonoBehaviour
 {
-    SC_GlobalEnums.turns turns = 0;
     private int Health = 30;
     public SC_MenuController Controller;
 
     public void OnClick()
     {
-        if (this.transform.name == "Player_Two_Hero" && turns.ToString() == "PlayerOne")
+        if (this.transform.name == "Player_Two_Hero" && SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerOne")
         {
             Health -= GlobalVariables.PlayerOneAttack;
             this.transform.Find("Health").GetComponent<Text>().text = Health.ToString();
@@ -37,7 +36,7 @@ public class SC_Hero : MonoBehaviour
                 
         }
 
-        if (this.transform.name == "Player_One_Hero" && turns.ToString() == "PlayerTwo")
+        if (this.transform.name == "Player_One_Hero" && SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerTwo")
         {
             Health -= GlobalVariables.PlayerTwoAttack;
             this.transform.Find("Health").GetComponent<Text>().text = Health.ToString();
@@ -48,6 +47,8 @@ public class SC_Hero : MonoBehaviour
                 WarpClient.GetInstance().stopGame();
             }
         }
+
+        
     }
 
     public void Restart()

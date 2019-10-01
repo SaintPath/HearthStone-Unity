@@ -233,6 +233,7 @@ public class SC_Menu : MonoBehaviour
     public void Btn_Play()
     {
         Debug.Log("Play");
+        SC_MenuLogic.Instance.singlePlayer = false;
         unityObjects["Btn_Play"].SetActive(false);
         int _value = (int)(SC_MenuLogic.Instance.sliders["Screen_MultiPlayer_Slider"].GetComponent<Slider>().value * 10);
         if (!matchRoomData.ContainsKey("Password"))

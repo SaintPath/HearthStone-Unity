@@ -166,14 +166,17 @@ public class SC_CardDisplay: MonoBehaviour, IBeginDragHandler, IDragHandler,IEnd
         if (!SC_MenuLogic.Instance.isMyTurn)
             return;
 
-        if (this.transform.parent.name == "Player_One_Field" && SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerOne")
+        if (this.transform.parent.name == "Player_One_Field" && 
+            SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerOne")
         {
             GlobalVariables.PlayerOneAttack = this.card.attack;
             this.GetComponent<Button>().interactable = false;
             GlobalVariables.cardSelected = true;
         }
 
-        if(this.transform.parent.name == "Player_Two_Field" && SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerOne" && GlobalVariables.cardSelected == true)
+        if(this.transform.parent.name == "Player_Two_Field" && 
+            SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerOne" && 
+            GlobalVariables.cardSelected == true)
         {
             this.card.health -= GlobalVariables.PlayerOneAttack;
             this.transform.Find("Health").GetComponent<Text>().text = this.card.health.ToString();
@@ -194,7 +197,9 @@ public class SC_CardDisplay: MonoBehaviour, IBeginDragHandler, IDragHandler,IEnd
             
         }
 
-        if (this.transform.parent.name == "Player_Two_Field" && SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerTwo")
+        if (this.transform.parent.name == "Player_Two_Field" && 
+            SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerTwo" && 
+            SC_MenuLogic.Instance.singlePlayer)
         {
             GlobalVariables.PlayerTwoAttack = this.card.attack;
             this.GetComponent<Button>().interactable = false;
@@ -202,24 +207,17 @@ public class SC_CardDisplay: MonoBehaviour, IBeginDragHandler, IDragHandler,IEnd
         }
 
         #region Single Player
-        //if (this.transform.parent.name == "Player_One_Field" && SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerTwo" && GlobalVariables.cardSelected == true)
-        //{
-        //    this.card.health -= GlobalVariables.PlayerTwoAttack;
-        //    this.transform.Find("Health").GetComponent<Text>().text = this.card.health.ToString();
-        //    GlobalVariables.PlayerTwoAttack = 0;
-        //    if (this.card.health <= 0)
-        //        Destroy(this.gameObject);
-
-        //    if (!SC_MenuLogic.Instance.toSend.ContainsKey("Attack"))
-        //    {
-        //        SC_MenuLogic.Instance.toSend.Add("Attack", SC_MenuLogic.Instance.attackNumber);
-        //    }
-        //    SC_MenuLogic.Instance.toSend.Add("CardName" + SC_MenuLogic.Instance.attackNumber, this.card.name);
-        //    SC_MenuLogic.Instance.toSend.Add("HealthLeft", this.card.health);
-        //    SC_MenuLogic.Instance.toSend["Attack"] = SC_MenuLogic.Instance.attackNumber;
-        //    SC_MenuLogic.Instance.attackNumber++;
-        //    GlobalVariables.cardSelected = false;
-        //}
+        if (this.transform.parent.name == "Player_One_Field" && 
+            SC_MenuLogic.Instance.currentTurn.ToString() == "PlayerTwo" && 
+            GlobalVariables.cardSelected == true && SC_MenuLogic.Instance.singlePlayer)
+        {
+            this.card.health -= GlobalVariables.PlayerTwoAttack;
+            this.transform.Find("Health").GetComponent<Text>().text = this.card.health.ToString();
+            GlobalVariables.PlayerTwoAttack = 0;
+            if (this.card.health <= 0)
+                Destroy(this.gameObject);
+            GlobalVariables.cardSelected = false;
+        }
         #endregion
     }
 }

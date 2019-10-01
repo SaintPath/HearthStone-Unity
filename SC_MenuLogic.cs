@@ -15,12 +15,14 @@ public class SC_MenuLogic : MonoBehaviour
     private Dictionary<string, ScriptableObject> cards;
     private Stack deckOne;
     private Stack deckTwo;
+    private Stack resetStack;
     public SC_Hero PlayerOneHero;
     public SC_Hero PlayerTwoHero;
     public SC_GlobalEnums.turns currentTurn;
     public bool isMyTurn;
     public Dictionary<string, object> toSend = new Dictionary<string, object>();
     public int attackNumber = 0;
+    public bool singlePlayer = true;
 
     static SC_MenuLogic instance;
     public static SC_MenuLogic Instance
@@ -62,6 +64,7 @@ public class SC_MenuLogic : MonoBehaviour
         cards = new Dictionary<string, ScriptableObject>();
         deckOne = new Stack();
         deckTwo = new Stack();
+        resetStack = new Stack();
 
         GameObject[] _screens = GameObject.FindGameObjectsWithTag("screenList");
         foreach (GameObject g in _screens)
@@ -85,6 +88,11 @@ public class SC_MenuLogic : MonoBehaviour
     public void ChangeScreen(SC_GlobalEnums.Screens _Screen)
     {
         screenStack.Push(currentScreen);
+        if (_Screen == SC_GlobalEnums.Screens.SinglePlayer)
+        {
+            isMyTurn = true;
+            screenList["Screen_SinglePlayer_Title"].GetComponent<Text>().text = "Player One";
+        }
         screenList["Screen_" + currentScreen].SetActive(false);
         screenList["Screen_" + _Screen].SetActive(true);
         currentScreen = _Screen;
@@ -133,18 +141,31 @@ public class SC_MenuLogic : MonoBehaviour
         {
             currentTurn = SC_GlobalEnums.turns.PlayerTwo;
             GlobalVariables.CardsPlayedbyPlayerOne = 0;
+            if (singlePlayer)
+            {
+                screenList["Screen_SinglePlayer_Title"].GetComponent<Text>().text = "Player Two";
+                PlayerTwoDraw();
+            }
         }
         else if (currentTurn == SC_GlobalEnums.turns.PlayerTwo)
         {
             currentTurn = SC_GlobalEnums.turns.PlayerOne;
             GlobalVariables.CardsPlayedbyPlayerTwo = 0;
+            if (singlePlayer)
+            {
+                screenList["Screen_SinglePlayer_Title"].GetComponent<Text>().text = "Player One";
+                PlayerOneDraw();
+            }
         }
 
         string _send = MiniJSON.Json.Serialize(toSend);
         WarpClient.GetInstance().sendMove(_send);
         toSend.Clear();
         UpdateGui();
-        screenList["Button_End_Turn"].SetActive(false);
+        if (!singlePlayer)
+        {
+            screenList["Button_End_Turn"].SetActive(false);
+        }
 
         GameObject[] _cardsInGame = GameObject.FindGameObjectsWithTag("Card");
         foreach (GameObject g in _cardsInGame)
@@ -159,13 +180,13 @@ public class SC_MenuLogic : MonoBehaviour
         _card.GetComponent<RectTransform>().transform.localScale = new Vector3(0.3f, 0.3f, 0);
     }
 
-    //public void PlayerTwoDraw()
-    //{
-    //    GameObject _card = Instantiate(Resources.Load("Card")) as GameObject;
-    //    _card.transform.SetParent(GameObject.Find("Player_Two_Field").transform.transform);
-    //    _card.GetComponent<SC_CardDisplay>().cardStats = deckTwo.Pop() as Card;
-    //    _card.GetComponent<RectTransform>().transform.localScale = new Vector3(0.3f, 0.3f, 0);
-    //}
+    public void PlayerTwoDraw()
+    {
+        GameObject _card = Instantiate(Resources.Load("Card")) as GameObject;
+        _card.transform.SetParent(GameObject.Find("Player_Two_Field").transform.transform);
+        _card.GetComponent<SC_CardDisplay>().cardStats = deckTwo.Pop() as Card;
+        _card.GetComponent<RectTransform>().transform.localScale = new Vector3(0.3f, 0.3f, 0);
+    }
 
 
     public void creatingDecks()
@@ -193,6 +214,10 @@ public class SC_MenuLogic : MonoBehaviour
             deckTwo.Push(_card);
             deckOne.Push(_card);
         }
+
+        resetStack.Push(Resources.Load("Decks/Player_One/Blink Fox 1") as ScriptableObject);
+        resetStack.Push(Resources.Load("Decks/Player_One/Ironbark Protector 1") as ScriptableObject);
+        resetStack.Push(Resources.Load("Decks/Player_One/Lord of the Arena 1") as ScriptableObject);
     }
 
     public void gameover()
@@ -234,11 +259,21 @@ public class SC_MenuLogic : MonoBehaviour
             PlayerTwoHero.Restart();
         }
 
+        while (resetStack.Count != 0) {
+            GameObject _card = Instantiate(Resources.Load("Card")) as GameObject;
+            _card.transform.SetParent(GameObject.Find("Player_One_Hand").transform.transform);
+            _card.GetComponent<SC_CardDisplay>().cardStats = resetStack.Pop() as Card;
+            _card.GetComponent<RectTransform>().transform.localScale = new Vector3(0.3f, 0.3f, 0);
+        }
+
         toSend.Clear();
         attackNumber = 0;
         UpdateGui();
         fillStacks();
-
+        GlobalVariables.PlayerOneAttack = 0;
+        GlobalVariables.PlayerTwoAttack = 0;
+        GlobalVariables.CardsPlayedbyPlayerOne = 0;
+        GlobalVariables.CardsPlayedbyPlayerTwo = 0;
         screenList["GameOver"].SetActive(false);
 
         ChangeScreen(SC_GlobalEnums.Screens.Menu);
